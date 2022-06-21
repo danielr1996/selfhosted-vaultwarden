@@ -1,0 +1,44 @@
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    restart: always
+    labels:
+      de.danielr1996.bashdoard.name: Vaultwarden
+      de.danielr1996.bashdoard.url: https://vault.app.danielr1996.de
+      de.danielr1996.bashdoard.icon: /web/favicon.ico
+      de.danielr1996.bashdoard.id: vaultwarden
+      traefik.enable: true
+      traefik.http.routers.vault.rule: Host(`vault.app.danielr1996.de`)
+      traefik.http.routers.vault.tls.certresolver: letsencrypt
+      traefik.http.routers.vault.service: vault
+      traefik.http.services.vault.loadbalancer.server.port: 80
+
+      traefik.http.routers.vaultws.rule: Host(`vault.app.danielr1996.de`) && Path(`/notifications/hub`)
+      traefik.http.routers.vaultws.service: vaultws
+      traefik.http.routers.vaultws.tls.certresolver: letsencrypt
+      traefik.http.services.vaultws.loadbalancer.server.port: 3012
+    volumes:
+      - config:/data
+    environment:
+      WEBSOCKET_ENABLED: true
+      DATABASE_URL: "postgresql://vaultwarden:vaultwarden@db/vaultwarden"
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: vaultwarden
+      POSTGRES_USER: vaultwarden
+      POSTGRES_DB: vaultwarden
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+  config:
+    driver_opts:
+      type: "nfs"
+      o: "addr=10.0.0.5,nolock,soft,rw"
+      device: ":/mnt/user/compose-data/vaultwarden/config"
+  db:
+    driver_opts:
+      type: "nfs"
+      o: "addr=10.0.0.5,nolock,soft,rw"
+      device: ":/mnt/user/compose-data/vaultwarden/db"
