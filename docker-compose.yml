@@ -1,11 +1,11 @@
 services:
   vaultwarden:
     image: vaultwarden/server:latest
-    restart: always
+    restart: unless-stopped
     labels:
       de.danielr1996.bashdoard.name: Vaultwarden
       de.danielr1996.bashdoard.url: https://vault.app.danielr1996.de
-      de.danielr1996.bashdoard.icon: /web/favicon.ico
+      de.danielr1996.bashdoard.icon: /images/favicon-16x16.png
       de.danielr1996.bashdoard.id: vaultwarden
       traefik.enable: true
       traefik.http.routers.vault.rule: Host(`vault.app.danielr1996.de`)
@@ -24,7 +24,7 @@ services:
       DATABASE_URL: "postgresql://vaultwarden:vaultwarden@db/vaultwarden"
   db:
     image: postgres
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: vaultwarden
       POSTGRES_USER: vaultwarden
